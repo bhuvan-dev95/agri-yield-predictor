@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173d2d">
+  <meta name="description" content="Agricultural Earth Resource Management — crop yield prediction dashboard">
+  <title>Crop Yield Prediction | Agricultural Earth Resource Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="Agricultural Earth Resource Management home">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <span>FIELD<span class="brand-light">NOTES</span></span>
+      </a>
+      <p class="side-label">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Dashboard sections">
+        <a class="nav-link active" href="#overview"><span>◫</span> Overview</a>
+        <a class="nav-link" href="#dataset"><span>▦</span> Dataset & cleaning</a>
+        <a class="nav-link" href="#eda"><span>⌁</span> Data exploration</a>
+        <a class="nav-link" href="#models"><span>◷</span> Model comparison</a>
+        <a class="nav-link" href="#predict"><span>＋</span> Make a prediction</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="side-status"><span class="status-dot"></span><span id="sidebar-status">Checking dataset</span></div>
+        <p>College PBL · Machine Learning</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <span class="breadcrumb">AGRICULTURAL EARTH RESOURCE MANAGEMENT <span>/</span> CROP YIELD PREDICTION</span>
+        <span class="topbar-tag"><span class="status-dot"></span> DATA-DRIVEN INSIGHTS</span>
+      </header>
+
+      <section class="hero" id="overview">
+        <div class="hero-copy">
+          <p class="eyebrow">SMARTER DECISIONS START WITH THE FIELD</p>
+          <h1>Agricultural Earth<br><em>Resource Management</em></h1>
+          <p class="hero-subtitle">Crop Yield Prediction</p>
+          <p class="hero-description">Explore how environmental and farm inputs relate to crop yield. Compare machine-learning models, estimate a scenario, and review input-based resource insights.</p>
+          <a class="button button-light" href="#predict">Explore a prediction <span aria-hidden="true">↘</span></a>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="hill hill-back"></div>
+          <div class="hill hill-front"></div>
+          <div class="field-lines"></div>
+          <div class="hero-stamp"><span>GROW</span><span>WITH</span><span>INSIGHT</span></div>
+        </div>
+        <div class="hero-index">01 — FIELD INTELLIGENCE</div>
+      </section>
+
+      <div id="global-alert" class="alert hidden" role="status"></div>
+
+      <section class="section-block" aria-labelledby="overview-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">THE PROJECT</p><h2 id="overview-heading">From field data to informed estimates</h2></div>
+          <span class="section-number">01 / 05</span>
+        </div>
+        <div class="overview-grid">
+          <article class="overview-card">
+            <span class="card-number">01</span><h3>The problem</h3>
+            <p>Crop outcomes depend on multiple environmental and farm inputs. Understanding how these recorded factors relate to yield can help make planning more evidence-aware.</p>
+          </article>
+          <article class="overview-card">
+            <span class="card-number">02</span><h3>The objective</h3>
+            <p>Analyze the supplied <code>crop_yield_data.csv</code>, expected to contain five agricultural inputs and a <code>crop_yield</code> target; no substitute observations are generated.</p>
+          </article>
+          <article class="overview-card">
+            <span class="card-number">03</span><h3>The approach</h3>
+            <p>Clean numeric data, explore distributions and correlations, compare three regressors on a held-out split, then use the lowest-RMSE model.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block" id="dataset" aria-labelledby="dataset-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">DATA QUALITY</p><h2 id="dataset-heading">Dataset & cleaning</h2></div>
+          <span class="section-number">02 / 05</span>
+        </div>
+        <div class="metric-grid">
+          <article class="metric-card"><span class="metric-label">SOURCE ROWS</span><strong id="row-count">—</strong><span>Before cleaning</span></article>
+          <article class="metric-card"><span class="metric-label">SOURCE COLUMNS</span><strong id="column-count">—</strong><span>CSV columns detected</span></article>
+          <article class="metric-card"><span class="metric-label">MISSING VALUES</span><strong id="missing-count">—</strong><span>Before cleaning</span></article>
+          <article class="metric-card"><span class="metric-label">CLEAN ROWS</span><strong id="clean-row-count">—</strong><span>Ready for analysis</span></article>
+        </div>
+        <div class="data-grid">
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">SCHEMA</p><h3>Model inputs & target</h3></div></div>
+            <div id="feature-list" class="feature-list"><span class="muted">Loading dataset schema…</span></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">CLEANING LOG</p><h3>Preparation summary</h3></div></div>
+            <dl class="detail-list">
+              <div><dt>Missing values before cleaning</dt><dd id="missing-detail">—</dd></div>
+              <div><dt>Invalid values handled</dt><dd id="invalid-count">—</dd></div>
+              <div><dt>Duplicate rows removed</dt><dd id="duplicate-count">—</dd></div>
+              <div><dt>Final dataset size</dt><dd id="final-size">—</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block" id="eda" aria-labelledby="eda-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">EXPLORE THE DATA</p><h2 id="eda-heading">Patterns worth a closer look</h2></div>
+          <span class="section-number">03 / 05</span>
+        </div>
+        <div class="figure-grid">
+          <article class="panel figure-card">
+            <div class="panel-heading"><div><p class="eyebrow">DISTRIBUTIONS</p><h3>Feature distributions</h3></div></div>
+            <img id="distribution-figure" alt="Histograms of the five model features and crop yield" class="eda-image hidden">
+            <p id="distribution-empty" class="empty-note">EDA figures appear when a valid dataset is available.</p>
+          </article>
+          <article class="panel figure-card">
+            <div class="panel-heading"><div><p class="eyebrow">RELATIONSHIPS</p><h3>Features vs. crop yield</h3></div></div>
+            <img id="relationship-figure" alt="Scatter plots of each model feature against crop yield" class="eda-image hidden">
+            <p id="relationship-empty" class="empty-note">Waiting for dataset analysis.</p>
+          </article>
+          <article class="panel figure-card heatmap-card">
+            <div class="panel-heading"><div><p class="eyebrow">CORRELATION</p><h3>Correlation heatmap</h3></div></div>
+            <img id="correlation-figure" alt="Correlation heatmap for all dataset columns" class="eda-image hidden">
+            <p id="correlation-empty" class="empty-note">Waiting for dataset analysis.</p>
+          </article>
+        </div>
+        <article class="panel stats-panel">
+          <div class="panel-heading"><div><p class="eyebrow">STATISTICS</p><h3>Descriptive summary</h3></div></div>
+          <div class="table-wrap"><table id="statistics-table"><thead><tr><th>Measure</th></tr></thead><tbody><tr><td class="muted">Dataset summary will appear here.</td></tr></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="section-block" id="models" aria-labelledby="models-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">MODEL EVALUATION</p><h2 id="models-heading">Choose by measured performance</h2></div>
+          <span class="section-number">04 / 05</span>
+        </div>
+        <div class="model-layout">
+          <article class="panel model-table-panel">
+            <div class="panel-heading"><div><p class="eyebrow">HELD-OUT TEST SET</p><h3>Regression model comparison</h3></div><span class="best-chip hidden" id="best-chip">BEST · LOWEST RMSE</span></div>
+            <div class="table-wrap">
+              <table id="model-table">
+                <thead><tr><th>Model</th><th>MAE</th><th>MSE</th><th>RMSE</th><th>R²</th></tr></thead>
+                <tbody><tr><td colspan="5" class="muted">Model results will appear when enough valid data is available.</td></tr></tbody>
+              </table>
+            </div>
+            <p class="table-note">Lower RMSE is used as the primary model-selection criterion. R² is reported for context.</p>
+          </article>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">AT A GLANCE</p><h3>Test RMSE comparison</h3></div></div>
+            <div class="chart-holder"><canvas id="model-chart" aria-label="Bar chart comparing model RMSE values"></canvas></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block prediction-section" id="predict" aria-labelledby="predict-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">SCENARIO PLANNER</p><h2 id="predict-heading">Estimate a crop-yield scenario</h2></div>
+          <span class="section-number">05 / 05</span>
+        </div>
+        <div class="prediction-layout">
+          <article class="panel form-panel">
+            <div class="panel-heading"><div><p class="eyebrow">YOUR FIELD PARAMETERS</p><h3>Enter the scenario</h3></div></div>
+            <form id="prediction-form" novalidate>
+              <div class="form-grid">
+                <label>Rainfall <span>(mm)</span><input name="rainfall_mm" type="number" min="0" step="any" required placeholder="Enter rainfall"></label>
+                <label>Soil quality index<input name="soil_quality_index" type="number" step="any" required placeholder="Dataset index scale"></label>
+                <label>Farm size <span>(hectares)</span><input name="farm_size_hectares" type="number" min="0" step="any" required placeholder="Enter farm area"></label>
+                <label>Sunlight <span>(hours)</span><input name="sunlight_hours" type="number" min="0" step="any" required placeholder="Enter sunlight hours"></label>
+                <label class="wide-field">Fertilizer <span>(kg)</span><input name="fertilizer_kg" type="number" min="0" step="any" required placeholder="Enter fertilizer input"></label>
+              </div>
+              <p class="form-help">Enter finite numeric values. The soil-quality index scale follows your dataset.</p>
+              <button class="button button-primary" id="predict-button" type="submit">Predict crop yield <span aria-hidden="true">→</span></button>
+              <p id="form-error" class="form-error hidden" role="alert"></p>
+            </form>
+          </article>
+          <article class="result-panel" id="prediction-result" aria-live="polite">
+            <div class="result-empty" id="result-empty">
+              <span class="result-icon" aria-hidden="true">↗</span>
+              <p class="eyebrow">PREDICTION RESULT</p>
+              <h3>Your estimate will appear here</h3>
+              <p>Complete all five inputs to see the selected model’s estimate and dataset-relative resource insights.</p>
+            </div>
+            <div class="result-content hidden" id="result-content">
+              <p class="eyebrow">MODEL ESTIMATE · NOT A GUARANTEE</p>
+              <h3>Scenario results</h3>
+              <div class="result-metrics">
+                <div><span>Predicted crop yield</span><strong id="predicted-yield">—</strong><small>Dataset target unit not specified</small></div>
+                <div><span>Expected production</span><strong id="expected-production">—</strong><small id="production-note">Farm size × predicted crop yield</small></div>
+              </div>
+              <div class="result-meta"><span>Best model <strong id="result-model">—</strong></span><span>Model RMSE <strong id="result-rmse">—</strong></span></div>
+              <div class="insights-wrap"><h4>Resource-management insights</h4><p class="disclaimer">Input-based comparisons, not guaranteed agricultural advice.</p><ul id="insight-list"></ul></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer class="page-footer">
+        <div><span class="brand-mark small" aria-hidden="true">✳</span> FIELDNOTES · AGRICULTURAL EARTH RESOURCE MANAGEMENT</div>
+        <p>Educational project. Model estimates reflect the supplied dataset and are not agronomic recommendations.</p>
+      </footer>
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

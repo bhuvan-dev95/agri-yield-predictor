@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+crop_yield_data.csv
+outputs/figures/*
+outputs/results/*
+outputs/predictions/*
+!outputs/figures/.gitkeep
+!outputs/results/.gitkeep
+!outputs/predictions/.gitkeep

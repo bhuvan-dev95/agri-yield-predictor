@@ -2,6 +2,8 @@
 
 const numberFormat = new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 });
 let modelChart;
+const staticMode = document.body.dataset.staticMode === "true";
+let staticModelBundle;
 
 function formatNumber(value) {
   return typeof value === "number" && Number.isFinite(value) ? numberFormat.format(value) : "—";
@@ -157,9 +159,14 @@ function renderModels(models, bestModel) {
 
 async function loadDashboard() {
   try {
-    const response = await fetch("/api/summary");
+    const response = await fetch(staticMode ? "./data/summary.json" : "/api/summary");
     if (!response.ok) throw new Error(`Dashboard request failed (${response.status}).`);
     renderSummary(await response.json());
+    if (staticMode) {
+      const modelResponse = await fetch("./data/model.json");
+      if (!modelResponse.ok) throw new Error(`Model request failed (${modelResponse.status}).`);
+      staticModelBundle = await modelResponse.json();
+    }
   } catch (error) {
     document.getElementById("sidebar-status").textContent = "Dashboard error";
     showAlert(error.message || "Could not load the project summary. Please refresh the page.");
@@ -202,6 +209,11 @@ document.getElementById("prediction-form").addEventListener("submit", async (eve
   button.disabled = true;
   button.textContent = "Calculating…";
   try {
+    if (staticMode) {
+      if (!staticModelBundle) throw new Error("The prediction model has not loaded yet. Refresh and try again.");
+      renderPrediction(createLocalPrediction(values, staticModelBundle));
+      return;
+    }
     const response = await fetch("/api/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -218,6 +230,54 @@ document.getElementById("prediction-form").addEventListener("submit", async (eve
     button.innerHTML = 'Predict crop yield <span aria-hidden="true">→</span>';
   }
 });
+
+function predictWithTree(tree, values) {
+  let node = 0;
+  while (tree.children_left[node] !== -1) {
+    const featureValue = values[tree.feature[node]];
+    node = featureValue <= tree.threshold[node] ? tree.children_left[node] : tree.children_right[node];
+  }
+  return tree.value[node];
+}
+
+function predictWithModel(values, model) {
+  if (model.kind === "linear") {
+    return model.intercept + model.coefficients.reduce((sum, coefficient, index) => sum + coefficient * values[index], 0);
+  }
+  if (model.kind === "tree") return predictWithTree(model.tree, values);
+  if (model.kind === "forest") {
+    return model.trees.reduce((sum, tree) => sum + predictWithTree(tree, values), 0) / model.trees.length;
+  }
+  throw new Error("The static site contains an unsupported prediction model.");
+}
+
+function createLocalPrediction(inputs, bundle) {
+  const orderedValues = bundle.features.map((feature) => inputs[feature]);
+  const predictedYield = predictWithModel(orderedValues, bundle.model);
+  const medians = bundle.medians;
+  const recommendations = {
+    rainfall_mm: ["Rainfall", "Compare rainfall with the dataset median; lower input may warrant checking local water availability, while higher input may warrant drainage planning."],
+    soil_quality_index: ["Soil quality index", "This index is interpreted relative to the dataset median only; confirm soil conditions with local testing."],
+    sunlight_hours: ["Sunlight", "Compare sunlight hours with the dataset median and consider local crop requirements and seasonal variation."],
+    fertilizer_kg: ["Fertilizer", "Compare fertilizer input with the dataset median; base any application changes on soil testing and crop-specific guidance."],
+    farm_size_hectares: ["Farm size", "Expected production scales the predicted yield by the entered farm size; plan labor, storage, and logistics for that area."],
+  };
+  const insights = bundle.features.map((feature) => {
+    const [parameter, insight] = recommendations[feature];
+    const comparison = inputs[feature] > medians[feature] ? "above" : inputs[feature] < medians[feature] ? "below" : "equal to";
+    return { parameter, value: inputs[feature], dataset_median: medians[feature], comparison, insight };
+  });
+  return {
+    inputs,
+    predicted_crop_yield: predictedYield,
+    expected_production: inputs.farm_size_hectares * predictedYield,
+    production_formula: "farm size × predicted crop yield",
+    production_unit_note: "Production unit is not specified because the dataset does not document the crop_yield unit.",
+    best_model: bundle.best_model,
+    model_rmse: bundle.model_rmse,
+    insights,
+  };
+}
 
 function renderPrediction(result) {
   document.getElementById("result-empty").classList.add("hidden");
@@ -237,6 +297,16 @@ function renderPrediction(result) {
     item.append(title, document.createElement("br"), document.createTextNode(insight.insight));
     list.append(item);
   });
+  const download = document.getElementById("prediction-download");
+  if (staticMode) {
+    const columns = [...Object.keys(result.inputs), "predicted_crop_yield", "expected_production", "best_model", "model_rmse"];
+    const values = [...Object.values(result.inputs), result.predicted_crop_yield, result.expected_production, result.best_model, result.model_rmse];
+    const csv = [columns.join(","), values.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")].join("\n");
+    download.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    download.classList.remove("hidden");
+  } else {
+    download.classList.add("hidden");
+  }
   document.getElementById("prediction-result").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 

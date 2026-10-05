@@ -52,6 +52,10 @@ The application reads the source CSV as provided and selects only these columns 
 
 The best model is selected primarily by the **lowest test-set RMSE**.
 
+## Live website
+
+The repository publishes a static version of the dashboard with [GitHub Pages](https://bhuvan-dev95.github.io/agri-yield-predictor/). The Pages workflow builds the summary, EDA figures, model-comparison table, and selected model directly from the included CSV. Prediction runs in the visitor's browser with the serialized selected model; the latest result can be downloaded as a CSV. The original Flask server and JSON API remain available when running locally.
+
 ## Evaluation metrics
 
 - **MAE:** mean absolute error
@@ -64,9 +68,13 @@ The best model is selected primarily by the **lowest test-set RMSE**.
 ```text
 .
 ├── main.py
-├── crop_yield_data.csv             # Supply the original dataset here
+├── crop_yield_data.csv
 ├── requirements.txt
 ├── README.md
+├── scripts/
+│   └── build_static.py              # Build the GitHub Pages dashboard
+├── .github/workflows/
+│   └── pages.yml
 ├── templates/
 │   └── index.html
 ├── static/
@@ -78,7 +86,7 @@ The best model is selected primarily by the **lowest test-set RMSE**.
     └── results/
 ```
 
-Generated files are written under `outputs/`:
+Generated files are written under `outputs/` by the Flask app and copied into the Pages artifact at build time:
 
 - `outputs/results/cleaned_dataset.csv`
 - `outputs/results/model_evaluation.csv`
@@ -104,6 +112,14 @@ python main.py
 ```
 
 Open <http://127.0.0.1:5000>.
+
+To build the static GitHub Pages artifact locally, run:
+
+```bash
+python scripts/build_static.py
+```
+
+The generated `site/` directory is a build artifact and is not committed.
 
 ## API
 

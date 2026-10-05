@@ -20,7 +20,7 @@ Python, Flask, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, HTML5, CSS3, Ja
 
 ## Dataset description
 
-Place `crop_yield_data.csv` in the same directory as `main.py`. The CSV must contain these exact columns:
+The repository includes `crop_yield_data.csv` in the same directory as `main.py`. The CSV must contain these exact columns:
 
 | Column | Use |
 | --- | --- |
@@ -95,7 +95,7 @@ Use Python 3.10 or newer. From the project directory:
 pip install -r requirements.txt
 ```
 
-Add the source `crop_yield_data.csv` beside `main.py`. The application validates it at startup. If the CSV is absent or invalid, the dashboard still starts and reports the issue; model comparison and predictions remain unavailable until a valid dataset is supplied.
+The included source `crop_yield_data.csv` is validated at startup. If it is removed or invalid, the dashboard still starts and reports the issue; model comparison and predictions remain unavailable until a valid dataset is supplied.
 
 ## How to run
 

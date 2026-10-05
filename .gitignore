@@ -3,7 +3,6 @@ __pycache__/
 .venv/
 venv/
 .env
-crop_yield_data.csv
 outputs/figures/*
 outputs/results/*
 outputs/predictions/*
